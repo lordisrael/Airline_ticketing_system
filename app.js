@@ -1,6 +1,6 @@
 const express = require("express");
 require("dotenv").config();
-
+const cookieParser = require("cookie-parser");
 const app = express();
 
 const notFoundMiddleware = require("./middleware/not-found");
@@ -16,7 +16,9 @@ app.get("/", (req, res) => {
   );
 });
 
+app.use(cookieParser());
 app.use(express.json());
+
 app.use("/api", authRoute);
 app.use("/api/admin", adminRoute)
 
