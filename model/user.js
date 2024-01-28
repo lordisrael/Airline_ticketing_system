@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const Sequelize = require("../db/database");
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs')
+
 
 const User = Sequelize.define(
   "users",
@@ -12,7 +13,7 @@ const User = Sequelize.define(
       allowNull: false, // Make sure id is not null
     },
     title: {
-      type: DataTypes.ENUM("Mr", "Mrs", "Miss", "Ms"), // Use ENUM for enumerated values
+      type: DataTypes.ENUM("Mr", "Mrs", "Miss", "Ms"),
       allowNull: false,
     },
     firstname: {
@@ -30,7 +31,7 @@ const User = Sequelize.define(
       },
     },
     dob: {
-      type: DataTypes.DATE, // Assuming date of birth is stored as a date
+      type: DataTypes.DATE,
     },
     email: {
       type: DataTypes.STRING,
@@ -40,10 +41,15 @@ const User = Sequelize.define(
       },
     },
     password: {
-      type: DataTypes.STRING, // Assuming password is stored as a string
+      type: DataTypes.STRING,
+      allowNull: false, // Assuming password is stored as a string
     },
     mobile: {
-      type: DataTypes.STRING, // Assuming mobile is stored as a string
+      type: DataTypes.STRING,
+      allowNull: false, // Assuming mobile is stored as a string
+    },
+    refreshToken: {
+      type: String,
     },
   },
   {
@@ -58,13 +64,5 @@ const User = Sequelize.define(
     },
   }
 );
-
-Sequelize.sync({ force: false })
-  .then(() => {
-    console.log("User table created successfully!");
-  })
-  .catch((error) => {
-    console.error("Unable to create table: ", error);
-  });
 
 module.exports = User;
