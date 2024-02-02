@@ -23,15 +23,12 @@ const Price = Sequelize.define(
     },
     economy: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
     },
     business: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
     },
     firstClass: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
     },
     // Additional attributes related to pricing
   },
