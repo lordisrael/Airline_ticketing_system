@@ -1,4 +1,6 @@
 const Flight = require("../model/flight");
+const Airport = require("../model/airport")
+const { Op, sequelize } = require("sequelize");
 const Price = require("../model/price")
 const uuidValidate = require("uuid-validate");
 const { createJWT } = require("../config/jwt");
@@ -149,7 +151,90 @@ const getAParticularFlight = asyncHandler(async(req, res) => {
 
 //TODO = search based on airrval and departure airport and departure date
 const searchFlight = asyncHandler(async(req, res) => {
-    
+  const { departureAirport, arrivalAirport, departureDateTime } = req.query;
+  const departureDate = new Date(departureDateTime);
+  const departureDay = departureDate.getDate();
+  const departureMonth = departureDate.getMonth();
+  const departureYear = departureDate.getFullYear();
+  console.log(departureYear);
+  console.log(departureMonth);
+  console.log(departureDay);
+
+  const departureTimeRangeStart = new Date(departureYear,departureMonth,departureDay,0,0,0,0);
+  const departureTimeRangeEnd = new Date(departureYear,departureMonth,departureDay,23,59,59,999);
+
+  const currentDateTime = new Date();
+
+  console.log(departureTimeRangeEnd);
+  console.log(departureTimeRangeStart);
+  const flights = await Flight.findAll({
+    where: {
+      departureAirport,
+      arrivalAirport,
+      departureDateTime: {
+        [Op.between]: [
+          departureTimeRangeStart.toISOString(),
+          departureTimeRangeEnd.toISOString(),
+        ],
+        [Op.gte]: currentDateTime.toISOString(),
+      },
+    },
+  });
+  
+  res.status(StatusCodes.OK).json({ flights });
+})
+
+const searchArrivingAirportOnFlight = asyncHandler(async(req, res) => {
+  const departureAirport = req.params.id;
+  const flights = await Flight.findAll({
+    where: {
+      departureAirport: departureAirport,
+    },
+    attributes: ["arrivalAirport"],
+  });
+
+  if(!flights) {
+    throw new NotFoundError("airport not found")
+  }
+   const arrivalAirportIds = flights.map((flight) => flight.arrivalAirport);
+   const uniqueArrivalAirportIds = [...new Set(arrivalAirportIds)];
+
+   const arrivalAirports = await Airport.findAll({
+     where: {
+       id: uniqueArrivalAirportIds,
+     },
+     attributes: {
+       exclude: ["name", "longitude", "latitude"],
+     },
+   });
+
+  res.status(StatusCodes.OK).json({ arrivalAirports });
+})
+
+const searchDepartureDateOnFlight = asyncHandler(async(req, res) => {
+  const {departureAirport, arrivalAirport} = req.query
+
+  const currentDateTime = new Date();
+  const flights = await Flight.findAll({
+    where: {
+      departureAirport,
+      arrivalAirport,
+      departureDateTime: {
+        [Op.gte]: currentDateTime.toISOString(),
+      },
+    },
+    attributes: ["departureDateTime"],
+  });
+
+  const formattedFlights = flights.map((flight) => ({
+    departureDateTime: formatDate(flight.departureDateTime),
+  }));
+  const flightDates = formattedFlights.map((formattedFlight) =>
+    formattedFlight.departureDateTime.slice(0, -10)
+  );
+  res.status(StatusCodes.OK).json({ flights: flightDates });
+  //res.status(StatusCodes.OK).json({ flights });
+
 })
 
 module.exports = {
@@ -159,5 +244,8 @@ module.exports = {
     checkFlightStatus,
     getAllFlights,
     updateFlightStatus,
-    getAParticularFlight
+    getAParticularFlight,
+    searchFlight,
+    searchArrivingAirportOnFlight,
+    searchDepartureDateOnFlight
 }
