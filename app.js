@@ -7,6 +7,7 @@ const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
 const authRoute = require("./routes/authRoutes");
 const adminRoute = require("./routes/adminRoutes")
+const searchRoute = require("./routes/searchRoutes")
 const dbConnect = require("./db/database");
 const { sequelize, User, Airport } = require("./model/index");
 
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.use("/api", authRoute);
 app.use("/api/admin", adminRoute)
+app.use("/api/search", searchRoute)
 
 sequelize
   .sync() // Use { force: true } for development, be cautious in production
