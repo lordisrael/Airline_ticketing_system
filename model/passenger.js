@@ -1,5 +1,6 @@
 const {DataTypes} = require("sequelize")
 const Sequelize = require("../db/database")
+const Price = require("../model/price")
 
 const Passenger = Sequelize.define("passengers", {
   id: {
@@ -48,6 +49,11 @@ const Passenger = Sequelize.define("passengers", {
       notEmpty: true,
     },
   },
+  reference: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
   priceId: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -56,6 +62,10 @@ const Passenger = Sequelize.define("passengers", {
       key: "id",
       onDelete: "CASCADE",
     },
+  },
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
 });
 
