@@ -1,39 +1,41 @@
-const { response } = require("express")
-
-const paystack = (request) => {
+    const request = require("request");
+    require("dotenv").config();
     const MySecretkey = process.env.PAYSTACK_SECRET_KEY
 
-    const initializePayment = (form, callback) => {
+    const initializePayment = (form, myCallback) => {
         const options = {
-            url: "https://api.paystack.co/transaction/initialize",
-            headers: {
-                authorization: MySecretkey,
-                'content_type' : "application/json",
-                'cache-control': 'no-cache',
-            },
-            form  
-        }
+          url: "https://api.paystack.co/transaction/initialize",
+          headers: {
+            Authorization: `Bearer ${MySecretkey}`,
+            content_type: "application/json",
+            "cache-control": "no-cache",
+          },
+          form,
+        };
+
         const callback = (error, response, body) => {
-            return mycallbck(error, body)
+            console.log("Response body:", body);
+            return myCallback(error, body)
         }
         request.post(options, callback)
     }
     
-    const verifypayment = (form, callback) => {
+    const verifyPayment = (ref, myCallback) => {
         const options = {
-          url: "https://api.paystack.co/transaction/verify/{reference}",
+          url: "https://api.paystack.co/transaction/verify/"+encodeURIComponent(ref),
           headers: {
-            authorization: MySecretkey,
+            authorization: `Bearer ${MySecretkey}`,
             content_type: "application/json",
             "cache-control": "no-cache",
-          }
+          },
         };
         const callback = (error, response, body) => {
-            return mycallbck(error, body)
+            return myCallback(error, body)
         }
         request(options, callback)
     }
-    return {initializePayment, verifypayment}
-}
 
-module.exports = paystack
+
+
+module.exports = { initializePayment, verifyPayment };
+
