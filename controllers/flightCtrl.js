@@ -33,7 +33,7 @@ const createFlight = asyncHandler(async(req, res) => {
   const flightAlreadyExists = await Flight.findOne({ where: { flightNumber } });
   if (!flightAlreadyExists) {
     const flight = await Flight.create(req.body);
-    res.status(StatusCodes.CREATED).json(flight);
+    res.status(StatusCodes.CREATED).json({status: "Success", data: flight});
   } else {
     return res.status(StatusCodes.CONFLICT).json("Flight already exists");
   }
@@ -59,8 +59,9 @@ const updateFlight = asyncHandler(async(req, res) => {
     }
   );
   res.status(StatusCodes.OK).json({
+    status: "Success",
     message: "Flight updated successfully",
-    existingFlight: existingFlight,
+    data: existingFlight,
   });
 
 })
@@ -74,7 +75,7 @@ const deleteFlight = asyncHandler(async(req, res) => {
 
   await Price.destroy({ where: { flightId } });
   await flight.destroy();
-  res.status(StatusCodes.OK).json({ message: "Flight deleted successfully" });
+  res.status(StatusCodes.OK).json({ status: "Success", message: "Flight deleted successfully" });
 
 })
 
@@ -123,7 +124,7 @@ const updateFlightStatus = asyncHandler(async(req, res) => {
   }
   flight.status = status;
   await flight.save();
-  res.status(StatusCodes.OK).json(flight);
+  res.status(StatusCodes.OK).json({status: "Success", data: flight});
 })
 
 const getAllFlights = asyncHandler(async(req, res)=> {
@@ -133,7 +134,7 @@ const getAllFlights = asyncHandler(async(req, res)=> {
   if(!flight) {
     throw new NotFoundError("Flight not found")
   }
-  res.status(StatusCodes.OK).json({flight})
+  res.status(StatusCodes.OK).json({status: "Success", data:flight})
 
 })
 
@@ -144,7 +145,7 @@ const getAParticularFlight = asyncHandler(async(req, res) => {
     throw new NotFoundError("Flight not found")
   }
 
-  res.status(StatusCodes.OK).json(flight)
+  res.status(StatusCodes.OK).json({status: "Success", data: flight})
 
 
 })
@@ -181,7 +182,7 @@ const searchFlight = asyncHandler(async(req, res) => {
     },
   });
   
-  res.status(StatusCodes.OK).json({ flights });
+  res.status(StatusCodes.OK).json({status: "Success", data: flights });
 })
 
 const searchArrivingAirportOnFlight = asyncHandler(async(req, res) => {
