@@ -16,44 +16,55 @@ const {
 
 
 const setPrice = asyncHandler(async(req, res) => {
-    const flightId = req.params.id
-    const { economy, business, firstClass } = req.body;
+  const flightId = req.params.id;
+  const { economy, business, firstClass } = req.body;
 
-    // Check if the associated Flight exists
-    const flight = await Flight.findByPk(flightId);
-    if (!flight) {
-        throw new NotFoundError("Flight not found");
-    }
+  // Check if the associated Flight exists
+  const flight = await Flight.findByPk(flightId);
+  if (!flight) {
+    throw new NotFoundError("Flight not found");
+  }
 
-    // Check if availableSeats are specified for the classes
-    const { availableSeats } = flight;
-    const isValidClass = (className) => availableSeats && availableSeats[className] !== undefined;
+  // Check if a price already exists for the flight
+  const existingPrice = await Price.findOne({ where: { flightId } });
+  if (existingPrice) {
+    return res
+      .status(StatusCodes.CONFLICT)
+      .json({ error: "Flight already has a price" });
+  }
 
-    // Create a new Price record only for the classes with available seats
-    const newPriceAttributes = {
-        flightId,
-    };
+  // Check if availableSeats are specified for the classes
+  const { availableSeats } = flight;
+  const isValidClass = (className) =>
+    availableSeats && availableSeats[className] !== undefined;
 
-    if (isValidClass("economy")) {
-      newPriceAttributes.economy = economy;
-    }
+  // Create a new Price record only for the classes with available seats
+  const newPriceAttributes = {
+    flightId,
+  };
 
-    if (isValidClass("business")) {
-      newPriceAttributes.business = business;
-    }
+  if (isValidClass("economy")) {
+    newPriceAttributes.economy = economy;
+  }
 
-    if (isValidClass("firstClass")) {
-      newPriceAttributes.firstClass = firstClass;
-    }
+  if (isValidClass("business")) {
+    newPriceAttributes.business = business;
+  }
 
-    // Create a new Price record only if at least one class has available seats
-    if (Object.keys(newPriceAttributes).length > 1) {
-        const newPrice = await Price.create(newPriceAttributes);
-        res.status(StatusCodes.CREATED).json({ price: newPrice });
-    } else {
-        // If no valid class is specified or all specified classes have no available seats
-        res.status(StatusCodes.BAD_REQUEST).json({ error: "No valid class with available seats specified" });
-    }
+  if (isValidClass("firstClass")) {
+    newPriceAttributes.firstClass = firstClass;
+  }
+
+  // Create a new Price record only if at least one class has available seats
+  if (Object.keys(newPriceAttributes).length > 1) {
+    const newPrice = await Price.create(newPriceAttributes);
+    res.status(StatusCodes.CREATED).json({ status: "Success",data: newPrice });
+  } else {
+    // If no valid class is specified or all specified classes have no available seats
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ error: "No valid class with available seats specified" });
+  }
 });
 
 
@@ -67,7 +78,7 @@ const getPrice = asyncHandler(async(req, res) => {
    if (!prices || prices.length === 0) {
      throw new NotFoundError("Prices not found for the specified flightId");
    }
-  res.status(StatusCodes.OK).json(prices);
+  res.status(StatusCodes.OK).json({ status: "Success", data: prices });
 })
 
 const updatePrice = asyncHandler(async(req, res) => {
@@ -85,7 +96,7 @@ const updatePrice = asyncHandler(async(req, res) => {
     business,
     firstClass,
   });
-  return res.status(200).json({ message: "Price updated successfully" });
+  return res.status(200).json({ status: "Success", message: "Price updated successfully" });
 })
 
 module.exports = {
