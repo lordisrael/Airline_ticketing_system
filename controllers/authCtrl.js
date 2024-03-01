@@ -1,6 +1,7 @@
 const User = require('../model/user')
 const uuidValidate = require("uuid-validate");
 const { createJWT } = require("../config/jwt");
+const bcrypt = require("bcryptjs");
 const { createRefreshJWT } = require("../config/refreshjwt");
 const { StatusCodes } = require("http-status-codes");
 const asyncHandler = require("express-async-handler");
@@ -12,6 +13,11 @@ const {
   BadRequestError,
 } = require("../error");
 
+async function hashPassword(password) {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  console.log("Hashed Password:", hashedPassword);
+}
 
 const createUser = async (req, res) => {
   const { email } = req.body;
@@ -107,13 +113,31 @@ const logout = asyncHandler(async(req, res) => {
 })
 
 const updatePassword = asyncHandler(async(req, res) => {
+  const {id} = req.user;
+  const { password } = req.body;
+  if (!password) {
+    throw new BadRequestError("Fill in your password"); // Check if the password was provided
+  }
+  const user = await User.findByPk(id);
+  if (!user) {
+    return res.status(404).json({ status: "Error", message: "User not found" }); // User not found in the database
+  }
+  
+  user.password = hashPassword(password);
+  
+  await user.save(); 
+  res
+    .status(StatusCodes.OK)
+    .json({ status: "Success", message: "Your password has been updated" });
 
 })
+
 
 module.exports = {
     createUser,
     login,
     profile,
     updatePassword,
-    logout
+    logout,
+    updatePassword
 }
