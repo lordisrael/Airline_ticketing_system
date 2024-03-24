@@ -3,6 +3,11 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const app = express();
 
+//swagger
+// const swaggerUI = require("swagger-ui-express");
+// const YAML = require("yamljs");
+// const swaggerDocument = YAML.load("./swagger.yaml"); 
+
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
 const authRoute = require("./routes/authRoutes");
@@ -17,7 +22,10 @@ app.get("/", (req, res) => {
     '<h1>Inentory Mangament System API</h1><a href="/api-docs">Documentation</a>'
   );
 });
+// app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
+app.use(helmet());
+app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 
