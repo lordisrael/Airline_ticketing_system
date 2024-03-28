@@ -49,8 +49,8 @@ const User = Sequelize.define(
       allowNull: false, // Assuming mobile is stored as a string
     },
     refreshToken: {
-      type: String,
-    },
+      type: DataTypes.STRING,
+    }
   },
   {
     timestamps: false,
